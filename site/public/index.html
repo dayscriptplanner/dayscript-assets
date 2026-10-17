@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DayScript — your day, in your own script.</title>
+<meta name="description" content="DayScript is a dated, hyperlinked digital planner for iPad and GoodNotes that is secretly a method. Write the ending first. The app that syncs it to your phone arrives winter 2026.">
+<link rel="canonical" href="https://dayscriptplanner.org/">
+<meta name="theme-color" content="#f7f3ea">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DayScript">
+<meta property="og:title" content="DayScript — your day, in your own script.">
+<meta property="og:description" content="A planner that's secretly a method. Dated, hyperlinked, made for iPad + GoodNotes. The app that syncs it to your phone arrives winter 2026.">
+<meta property="og:url" content="https://dayscriptplanner.org/">
+<meta property="og:image" content="https://dayscriptplanner.org/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DayScript — your day, in your own script.">
+<meta name="twitter:description" content="A planner that's secretly a method. The app that syncs it to your phone arrives winter 2026.">
+<meta name="twitter:image" content="https://dayscriptplanner.org/og.png">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23f7f3ea'/%3E%3Cg fill='none' stroke='%23b5713d' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M9 40a23 23 0 0 1 46 0'/%3E%3Cpath d='M18 40a14 14 0 0 1 28 0'/%3E%3C/g%3E%3Ccircle cx='32' cy='38' r='7' fill='%23b5713d'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f7f3ea'/%3E%3Cg fill='none' stroke='%23b5713d' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M9 40a23 23 0 0 1 46 0'/%3E%3Cpath d='M18 40a14 14 0 0 1 28 0'/%3E%3C/g%3E%3Ccircle cx='32' cy='38' r='7' fill='%23b5713d'/%3E%3C/svg%3E">
+
+<link rel="preload" href="fonts/playfair-display-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/karla-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip" href="#waitlist">skip to the waitlist</a>
+
+<header class="top">
+  <a class="brand" href="/" aria-label="DayScript home">
+    <svg class="mark" viewBox="0 0 64 48" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round">
+        <path d="M7 38a25 25 0 0 1 50 0"/>
+        <path d="M17 38a15 15 0 0 1 30 0"/>
+      </g>
+      <circle cx="32" cy="36" r="7" fill="currentColor"/>
+    </svg>
+    <span class="wordmark">dayscript</span>
+  </a>
+  <nav class="topnav" aria-label="Page">
+    <a href="#method">the method</a>
+    <a href="#book">the book</a>
+    <a href="#app">the app</a>
+    <a class="pill" href="#waitlist">waitlist</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- HERO -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap">
+    <p class="eyebrow">a dated, hyperlinked planner for iPad + GoodNotes</p>
+    <h1 id="hero-title" class="tagline">your day, <em>in your own script.</em></h1>
+    <p class="thesis">DayScript is a planner that’s secretly a method: you write the ending first, and every page after that is just the way home.</p>
+
+    <form id="waitlist" class="waitlist" action="/api/waitlist" method="post" novalidate>
+      <label for="email" class="label">The app arrives winter 2026. Be first in line.</label>
+      <div class="field">
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@somewhere.com" required aria-describedby="form-note">
+        <button type="submit" class="btn">join the app waitlist</button>
+      </div>
+      <p id="form-note" class="note" aria-live="polite">One email when it opens. No newsletters, no drip, no counting you out loud.</p>
+    </form>
+
+    <p class="secondary">Prefer paper you can write on today? <a href="https://www.etsy.com/shop/DayscriptShop" rel="noopener" target="_blank">The 2026–2027 planner is on Etsy →</a></p>
+  </div>
+
+  <figure class="hero-card" aria-hidden="true">
+    <div class="card">
+      <svg class="card-mark" viewBox="0 0 64 48"><g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M7 38a25 25 0 0 1 50 0"/><path d="M17 38a15 15 0 0 1 30 0"/></g><circle cx="32" cy="36" r="7" fill="currentColor"/></svg>
+      <p class="card-line" data-smile>the ending is written first. the middle is just commuting.</p>
+      <span class="card-rule"></span>
+      <p class="card-foot">D A Y S C R I P T</p>
+    </div>
+  </figure>
+</section>
+
+<!-- THE METHOD -->
+<section id="method" class="method" aria-labelledby="method-title">
+  <div class="wrap">
+    <p class="eyebrow">the method, in 90 seconds</p>
+    <h2 id="method-title">Most planners start with Monday. <em>This one starts with the last page.</em></h2>
+
+    <ol class="steps">
+      <li>
+        <span class="num">01</span>
+        <h3>Write the ending first.</h3>
+        <p>Before a single date, one page asks where you want the year to land. A paragraph, a sentence, a word. You write the ending the way a novelist does: before the rest exists, so the rest has somewhere to go.</p>
+      </li>
+      <li>
+        <span class="num">02</span>
+        <h3>Break it into chapters.</h3>
+        <p>An ending is too far away to act on. Chapters are the three or four storylines that would have to be true for it to happen. They get names, not deadlines.</p>
+      </li>
+      <li>
+        <span class="num">03</span>
+        <h3>Let it cascade.</h3>
+        <p>Each chapter leaves a trace on the month, the month on the week, the week on today. Nothing is copied twice; the links do the carrying. That’s the cascade, and it’s why the pages are hyperlinked instead of merely dated.</p>
+      </li>
+      <li>
+        <span class="num">04</span>
+        <h3>Pick one goal.</h3>
+        <p>Every week and every day, one thing is circled. Circled means real. Everything else is weather.</p>
+      </li>
+      <li>
+        <span class="num">05</span>
+        <h3>Write today’s plot.</h3>
+        <p>Today’s page is a scene, not a spreadsheet: the one goal, a short list, and a line about how it went. Done in your own hand, in about the time it takes a kettle to boil.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- SMILE LINES -->
+<section class="smiles" aria-label="Lines from the margins">
+  <div class="ticker" role="list">
+    <p role="listitem">coffee first. legibility second.</p>
+    <p role="listitem">today has excellent margins.</p>
+    <p role="listitem">somewhere, a tuesday is proud of you.</p>
+    <p role="listitem">ambition, but make it legible.</p>
+    <p role="listitem">circled means real. everything else is weather.</p>
+    <p role="listitem">dream in years, plan in weeks, forgive in days.</p>
+    <p role="listitem">your future self reads this. wave.</p>
+    <p role="listitem">rest is a task. check it off.</p>
+  </div>
+  <p class="smiles-cap">forty-eight lines like these live in the margins of the book.</p>
+</section>
+
+<!-- WHAT'S IN THE BOOK -->
+<section id="book" class="book" aria-labelledby="book-title">
+  <div class="wrap">
+    <p class="eyebrow">what’s in the book</p>
+    <h2 id="book-title">Dated for 2026–2027. <em>Every page linked to every other.</em></h2>
+
+    <ul class="toc">
+      <li>
+        <span class="toc-num">i</span>
+        <div><h3>Cover</h3><p>Cream paper, copper rule, your name if you want it there. It opens like a book because it is one.</p></div>
+      </li>
+      <li>
+        <span class="toc-num">ii</span>
+        <div><h3>The method</h3><p>A few pages that explain the whole thing once, so the rest of the planner never has to nag.</p></div>
+      </li>
+      <li>
+        <span class="toc-num">iii</span>
+        <div><h3>Year &amp; storylines</h3><p>The ending, written first. Then the chapters: three or four storylines with room to revise them as the year revises you.</p></div>
+      </li>
+      <li>
+        <span class="toc-num">iv</span>
+        <div><h3>Month</h3><p>A dated spread for every month with the month’s one goal up top and tabs that jump straight to any week.</p></div>
+      </li>
+      <li>
+        <span class="toc-num">v</span>
+        <div><h3>Week</h3><p>A dated spread for every week: its circled goal, seven generous columns, and a smile line in the margin.</p></div>
+      </li>
+      <li>
+        <span class="toc-num">vi</span>
+        <div><h3>Today</h3><p>A daily page for every date: one goal, a short list, a line for how it went. Handwriting counts as a font.</p></div>
+      </li>
+      <li>
+        <span class="toc-num">vii</span>
+        <div><h3>Archive &amp; clearing</h3><p>Where finished chapters go to be remembered, and a clearing page for whatever didn’t make it. The archive remembers so you don’t have to.</p></div>
+      </li>
+    </ul>
+
+    <div class="book-cta">
+      <p>Made for GoodNotes on iPad. It’s a hyperlinked PDF, so any notes app that follows links will do.</p>
+      <a class="btn btn-ghost" href="https://www.etsy.com/shop/DayscriptShop" rel="noopener" target="_blank">see the planner on Etsy</a>
+    </div>
+  </div>
+</section>
+
+<!-- THE APP -->
+<section id="app" class="app" aria-labelledby="app-title">
+  <div class="wrap">
+    <p class="eyebrow">the app · winter 2026</p>
+    <h2 id="app-title">The planner that <em>syncs to your phone.</em></h2>
+    <p class="lede">You still write in the book. The app reads along, so today’s plot, your one goal and your reminders are in your pocket when the iPad isn’t. A companion that never opens a window you didn’t ask for.</p>
+
+    <div class="tiers">
+      <article class="tier">
+        <h3>The planner</h3>
+        <p class="price">free</p>
+        <ul>
+          <li>Today, week and month on your phone</li>
+          <li>Write the ending, name your chapters</li>
+          <li>The one goal, circled, everywhere</li>
+        </ul>
+      </article>
+      <article class="tier tier-paid">
+        <h3>Sync, calendar &amp; AI</h3>
+        <p class="price">a small subscription</p>
+        <ul>
+          <li>Sync with the iPad planner you already own</li>
+          <li>Reminders and calendar in both directions</li>
+          <li>An assistant that reads your handwriting and drafts tomorrow from it</li>
+        </ul>
+      </article>
+    </div>
+
+    <p class="honest">Honest status, October 2026: the app is in prototype. There is no download yet, no launch date beyond “winter,” and no one on the waitlist but the people who chose to be. If you join, you’ll hear from us once, when it’s ready to try.</p>
+
+    <a class="btn" href="#waitlist">join the app waitlist</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-brand">
+      <svg class="mark" viewBox="0 0 64 48" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M7 38a25 25 0 0 1 50 0"/><path d="M17 38a15 15 0 0 1 30 0"/></g><circle cx="32" cy="36" r="7" fill="currentColor"/></svg>
+      <p class="foot-tag">your day, in your own script.</p>
+    </div>
+    <ul class="foot-links">
+      <li><a href="https://www.etsy.com/shop/DayscriptShop" rel="noopener" target="_blank">Etsy</a></li>
+      <li><a href="https://www.instagram.com/dayscriptplanner" rel="noopener" target="_blank">Instagram</a></li>
+      <li><a href="https://www.tiktok.com/@dayscriptplanner" rel="noopener" target="_blank">TikTok</a></li>
+      <li><a href="https://www.pinterest.com/dayscriptplanner" rel="noopener" target="_blank">Pinterest</a></li>
+      <li><a href="mailto:hello@dayscriptplanner.org">hello@dayscriptplanner.org</a></li>
+    </ul>
+    <p class="foot-small">@dayscriptplanner everywhere · © 2026 DayScript</p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
