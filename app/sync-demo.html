@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DayScript sync demo</title>
+<style>
+  :root { color-scheme: light dark; font: 15px/1.45 system-ui, sans-serif; }
+  body { max-width: 720px; margin: 2rem auto; padding: 0 16px; }
+  h1 { font-size: 1.25rem; }
+  fieldset { border: 1px solid #8884; border-radius: 8px; margin: 1rem 0; padding: 1rem; }
+  textarea { width: 100%; min-height: 220px; font: 13px/1.4 ui-monospace, monospace; box-sizing: border-box; }
+  button, input { font: inherit; padding: .4rem .7rem; }
+  #status { font-weight: 600; }
+  #status[data-s="synced"] { color: #2a7; }
+  #status[data-s="syncing"] { color: #a80; }
+  #status[data-s="offline"], #status[data-s="error"] { color: #c33; }
+  #status[data-s="conflict-resolved"] { color: #36c; }
+  #log { font: 12px/1.4 ui-monospace, monospace; max-height: 180px; overflow: auto; white-space: pre-wrap; background: #8881; padding: .5rem; }
+  small { opacity: .7; }
+</style>
+</head>
+<body>
+<h1>DayScript sync demo <small>(test page, not the product)</small></h1>
+<p>Fills in <code>config.js</code> first. Open this page in two browsers, sign in as the same user, edit on one, watch the other pull on focus.</p>
+
+<fieldset>
+  <legend>Account</legend>
+  <div>Status: <span id="status" data-s="signed-out">loading…</span> &nbsp; <small id="who"></small></div>
+  <p>
+    <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
+    <button id="magic">Email me a magic link</button>
+  </p>
+  <p>
+    <button id="google">Sign in with Google</button>
+    <button id="apple">Sign in with Apple</button>
+    <button id="signout">Sign out</button>
+  </p>
+</fieldset>
+
+<fieldset>
+  <legend>Fake planner state <small>(autosaved to <code>margin.planner.demo</code>; every edit calls <code>save()</code> → <code>sync.scheduleSave()</code>)</small></legend>
+  <textarea id="state" spellcheck="false"></textarea>
+  <p>
+    <button id="pull">Pull now</button>
+    <button id="push">Push now</button>
+    <button id="ai">Test AI (readTheDay stub)</button>
+    <small>version: <span id="ver">–</span> · dirty: <span id="dirty">–</span></small>
+  </p>
+</fieldset>
+
+<fieldset>
+  <legend>Event log</legend>
+  <div id="log"></div>
+</fieldset>
+
+<script type="module">
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+  import { createSync } from './sync.js';
+
+  // ---- a stand-in for the prototype's `state` + `save()` -------------------
+  const KEY = 'margin.planner.demo';
+  let state;
+  try { state = JSON.parse(localStorage.getItem(KEY)) ?? null; } catch { state = null; }
+  if (!state) state = { meta: { updatedAt: new Date().toISOString() }, notes: 'type here' };
+
+  const $ = (id) => document.getElementById(id);
+  const ta = $('state');
+  const logEl = $('log');
+  const log = (...a) => { logEl.textContent = `${new Date().toLocaleTimeString()}  ${a.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join(' ')}\n` + logEl.textContent; };
+
+  function render() { ta.value = JSON.stringify(state, null, 2); $('ver').textContent = sync.version ?? '–'; $('dirty').textContent = String(sync.dirty); }
+  function save({ fromSync = false } = {}) {
+    if (!fromSync) state.meta = { ...(state.meta ?? {}), updatedAt: new Date().toISOString() };
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+    if (!fromSync) sync.scheduleSave();        // <-- the one line the prototype adds
+    render();
+  }
+
+  // ---- sync -----------------------------------------------------------------
+  const sync = createSync({
+    supabaseUrl: SUPABASE_URL,
+    supabaseAnonKey: SUPABASE_ANON_KEY,
+    getState: () => state,
+    applyState: (s) => { state = s; save({ fromSync: true }); log('applied server state'); },
+    onStatus: (s, d) => {
+      $('status').textContent = s; $('status').dataset.s = s;
+      $('who').textContent = sync.user()?.email ?? '';
+      log(s, d ?? '');
+      render();
+    },
+  });
+  sync.ready.then(() => { log('sync ready; client', sync.clientId); render(); }).catch((e) => log('init failed', e.message));
+
+  // ---- editing --------------------------------------------------------------
+  let t;
+  ta.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      try { const parsed = JSON.parse(ta.value); state = parsed; save(); }
+      catch { /* invalid JSON while typing; ignore */ }
+    }, 300);
+  });
+
+  // ---- buttons --------------------------------------------------------------
+  $('magic').onclick = async () => {
+    try { await sync.signInWithEmail($('email').value.trim()); log('magic link sent — check your email'); }
+    catch (e) { log('magic link error', e.message); }
+  };
+  $('google').onclick = () => sync.signInWithOAuth('google').catch((e) => log('google error', e.message));
+  $('apple').onclick = () => sync.signInWithOAuth('apple').catch((e) => log('apple error', e.message));
+  $('signout').onclick = () => sync.signOut().catch((e) => log('signout error', e.message));
+  $('pull').onclick = () => sync.pull().then((r) => log('pull →', r)).catch((e) => log('pull error', e.message));
+  $('push').onclick = () => sync.push().then((r) => log('push →', r)).catch((e) => log('push error', e.message));
+  $('ai').onclick = async () => {
+    try {
+      const res = await sync.ai({
+        max_tokens: 120,
+        system: 'Return ONLY a JSON array of at most 6 strings, each ≤60 chars.',
+        messages: [{ role: 'user', content: `Suggest 3 tiny next steps from these notes: ${JSON.stringify(state.notes ?? '')}` }],
+      });
+      log('ai →', res.content?.[0]?.text ?? res, 'usage', res.usage);
+    } catch (e) { log(`ai error ${e.status ?? ''}`, e.message); }
+  };
+
+  // pull when the tab comes back (other device may have written)
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && sync.user()) sync.pull().catch(() => {}); });
+  render();
+</script>
+</body>
+</html>
