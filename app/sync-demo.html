@@ -25,7 +25,12 @@
 <p>Fills in <code>config.js</code> first. Open this page in two browsers, sign in as the same user, edit on one, watch the other pull on focus.</p>
 
 <fieldset>
-  <legend>Account</legend>
+  <legend>Brand sign-in sheet (sync-ui.js — what the planner's cover will show)</legend>
+  <div id="cover-actions"></div>
+</fieldset>
+
+<fieldset>
+  <legend>Account (raw buttons)</legend>
   <div>Status: <span id="status" data-s="signed-out">loading…</span> &nbsp; <small id="who"></small></div>
   <p>
     <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
@@ -54,6 +59,7 @@
   <div id="log"></div>
 </fieldset>
 
+<script src="./sync-ui.js"></script>
 <script type="module">
   import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
   import { createSync } from './sync.js';
@@ -78,6 +84,7 @@
   }
 
   // ---- sync -----------------------------------------------------------------
+  let ui;
   const sync = createSync({
     supabaseUrl: SUPABASE_URL,
     supabaseAnonKey: SUPABASE_ANON_KEY,
@@ -87,9 +94,11 @@
       $('status').textContent = s; $('status').dataset.s = s;
       $('who').textContent = sync.user()?.email ?? '';
       log(s, d ?? '');
+      ui && ui.onStatus(s, d);
       render();
     },
   });
+  ui = mountSyncUI({ sync, anchor: $('cover-actions') });
   sync.ready.then(() => { log('sync ready; client', sync.clientId); render(); }).catch((e) => log('init failed', e.message));
 
   // ---- editing --------------------------------------------------------------
