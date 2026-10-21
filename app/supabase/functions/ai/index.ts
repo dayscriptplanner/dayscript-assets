@@ -28,6 +28,8 @@ const MAX_TOKENS_CAP = 400;
 const DEFAULT_MODEL = Deno.env.get("AI_MODEL") ?? "claude-sonnet-5-5";
 const ALLOWED_MODEL_PREFIX = "claude-"; // refuse anything that isn't an Anthropic model id
 const MAX_BODY_BYTES = 1_500_000; // ~1.1 MB base64 PNG + text
+const MAX_MESSAGES = 24;          // a planner page never needs a long transcript
+const MAX_SYSTEM_CHARS = 8_000;
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
@@ -149,6 +151,15 @@ Deno.serve(async (req) => {
   if (!body || !Array.isArray(body.messages) || body.messages.length === 0) {
     return json(req, 400, { error: "bad_request", detail: "messages[] required" });
   }
+  if (body.messages.length > MAX_MESSAGES) {
+    return json(req, 400, { error: "bad_request", detail: `at most ${MAX_MESSAGES} messages` });
+  }
+  if (body.system !== undefined && (typeof body.system !== "string" || body.system.length > MAX_SYSTEM_CHARS)) {
+    return json(req, 400, { error: "bad_request", detail: "system must be a short string" });
+  }
+  if (body.stream) {
+    return json(req, 400, { error: "bad_request", detail: "streaming is not supported here" });
+  }
   for (const m of body.messages) {
     if (Array.isArray(m.content)) {
       for (const b of m.content) {
@@ -170,6 +181,9 @@ Deno.serve(async (req) => {
     Math.max(1, Number(body.max_tokens) || MAX_TOKENS_CAP),
     MAX_TOKENS_CAP,
   );
+  const temperature = typeof body.temperature === "number" && body.temperature >= 0 && body.temperature <= 1
+    ? body.temperature
+    : undefined;
   const estInput = roughInputTokens(body);
 
   // 3. Budget check (service role bypasses RLS — clients can only read ai_usage).
@@ -213,7 +227,7 @@ Deno.serve(async (req) => {
       model,
       max_tokens: maxTokens,
       system: body.system,
-      temperature: body.temperature,
+      temperature,
       messages: body.messages,
       stream: false,
       metadata: { user_id: user.id }, // lets Anthropic-side abuse detection key on our user id

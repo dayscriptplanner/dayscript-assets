@@ -1,8 +1,11 @@
 /**
- * GET /api/count?key=<ADMIN_KEY>            -> {ok:true, count, bySource:{web:n, pdf:n, ...}}
- * GET /api/count?key=<ADMIN_KEY>&list=1     -> same, plus the full list of signups (newest first)
+ * GET /api/count            -> {ok:true, count, bySource:{web:n, pdf:n, ...}}
+ * GET /api/count?list=1     -> same, plus the full list of signups (newest first)
  *
- * For Katie only. The key is compared to the ADMIN_KEY environment variable set on the Pages project.
+ * For Katie only. Send the key as a header:  Authorization: Bearer <ADMIN_KEY>
+ * (A ?key= query parameter still works for a quick look from a browser, but query strings
+ *  end up in logs and browser history, so prefer the header from scripts.)
+ * The key is compared in constant time to the ADMIN_KEY environment variable on the Pages project.
  */
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
@@ -23,7 +26,8 @@ export async function onRequestGet({ request, env }) {
   if (!env.WAITLIST) return json({ ok: false, error: 'WAITLIST KV namespace is not bound.' }, 503);
 
   const url = new URL(request.url);
-  const key = url.searchParams.get('key') || '';
+  const auth = request.headers.get('authorization') || '';
+  const key = (auth.toLowerCase().startsWith('bearer ') ? auth.slice(7).trim() : '') || url.searchParams.get('key') || '';
   if (!safeEqual(key, env.ADMIN_KEY)) return json({ ok: false, error: 'Nope.' }, 401);
 
   const wantList = url.searchParams.get('list') === '1';

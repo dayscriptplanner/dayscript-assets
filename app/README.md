@@ -4,7 +4,10 @@ This folder is build-order **step 2** (Supabase backend) and the client half of 
 
 ```
 app/
-├── planner.html                      ← THE APP. One file: cover, today, week, month, year, lists, clearing, archive, pen, companion
+├── planner.html + planner.js         ← THE APP: cover, today, week, month, year, lists, clearing, archive, pen, companion
+├── _headers                          ← CSP + HSTS etc. for the app.dayscriptplanner.org Pages project
+├── make-demo.py                      ← builds dayscript-demo.html (single file, no sync) for sharing
+├── dayscript-demo.html               ← the shareable demo (generated; don't edit by hand)
 ├── config.js                         ← the one file Katie edits (Supabase URL + anon key)
 ├── sync.js                           ← ES module: createSync({...}) — auth, pull/push, offline queue, ai()
 ├── sync.iife.js                      ← loader for a classic <script> page (the single-file prototype)
@@ -12,6 +15,7 @@ app/
 ├── sync.test.mjs                     ← node --test app/sync.test.mjs
 └── supabase/
     ├── migrations/0001_planners.sql  ← tables, triggers, RLS
+    ├── migrations/0002_limits.sql    ← document size caps (run right after 0001)
     └── functions/ai/index.ts         ← Deno edge function: JWT check → daily budget → Anthropic
 ```
 
@@ -28,7 +32,7 @@ Ground rules baked in:
 
 1. **Create the project.** Go to [supabase.com](https://supabase.com) → New project (free tier is fine). Name it `dayscript`, pick a strong database password (save it in your password manager — you only need it for CLI work), region **US East**. Wait ~2 minutes for it to provision.
 
-2. **Run the migration.** In the dashboard open **SQL Editor → New query**, paste the whole contents of `app/supabase/migrations/0001_planners.sql`, click **Run**. You should see "Success. No rows returned". (CLI alternative: `supabase link --project-ref <ref>` then `supabase db push`.) Check **Table Editor** — you should now see `planners`, `planner_snapshots`, `ai_usage`, each with a shield icon (RLS on).
+2. **Run the migrations.** In the dashboard open **SQL Editor → New query**, paste the whole contents of `app/supabase/migrations/0001_planners.sql`, click **Run**. You should see "Success. No rows returned". Then do the same with `0002_limits.sql`. (CLI alternative: `supabase link --project-ref <ref>` then `supabase db push`.) Check **Table Editor** — you should now see `planners`, `planner_snapshots`, `ai_usage`, each with a shield icon (RLS on).
 
 3. **Turn on Email magic links.** **Authentication → Providers → Email**: *Enable Email provider* ON, leave *Confirm email* at its default, and make sure the sign-in method is **Magic Link / OTP** (we never use passwords). You don't need to toggle anything else. Optional but recommended: **Authentication → Email Templates → Magic Link** — change the subject to "Your DayScript sign-in link". (Supabase's built-in mailer is rate-limited to a few emails/hour; before launch, add a custom SMTP under **Project Settings → Auth → SMTP** — Resend's free tier is the easiest.)
 
