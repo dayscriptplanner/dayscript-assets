@@ -1,9 +1,10 @@
 # DayScript app — accounts, sync, and the AI proxy
 
-This folder is build-order **step 2** (Supabase backend) and the client half of **step 3** (sync + AI proxy) for the DayScript web app. The planner itself (the prototype HTML) is not here yet; this is the plumbing it plugs into.
+This folder is build-order **step 2** (Supabase backend) and the client half of **step 3** (sync + AI proxy) for the DayScript web app. `planner.html` is the planner itself (decided 2026-10-21: the cloud-built prototype is the app; the older v11 artifact on the Mac is no longer on the critical path). It runs fully signed-out from a plain static server and switches sync on by itself once `config.js` holds real values.
 
 ```
 app/
+├── planner.html                      ← THE APP. One file: cover, today, week, month, year, lists, clearing, archive, pen, companion
 ├── config.js                         ← the one file Katie edits (Supabase URL + anon key)
 ├── sync.js                           ← ES module: createSync({...}) — auth, pull/push, offline queue, ai()
 ├── sync.iife.js                      ← loader for a classic <script> page (the single-file prototype)
