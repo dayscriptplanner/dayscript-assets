@@ -203,13 +203,24 @@ Deno.serve(async (req) => {
   const inTok = usage?.input_tokens ?? 0;
   const outTok = usage?.output_tokens ?? 0;
 
-  if (calls >= DAILY_CALLS || inTok + estInput > DAILY_INPUT_TOKENS) {
+  // 3b. Plan-aware limit (migration 0003): entitlements.ai_daily_calls — free 15/day, pro 200/day.
+  //     Falls back to AI_DAILY_CALLS if the view isn't there yet (pre-0003 projects).
+  let dailyCalls = DAILY_CALLS;
+  let isPro = false;
+  {
+    const { data: ent } = await admin.from("entitlements").select("ai_daily_calls, is_pro").eq("user_id", user.id).maybeSingle();
+    if (ent?.ai_daily_calls) { dailyCalls = Number(ent.ai_daily_calls); isPro = !!ent.is_pro; }
+  }
+  const dailyInputTokens = isPro ? DAILY_INPUT_TOKENS * 4 : DAILY_INPUT_TOKENS;
+
+  if (calls >= dailyCalls || inTok + estInput > dailyInputTokens) {
     const resetAt = new Date(`${day}T00:00:00Z`);
     resetAt.setUTCDate(resetAt.getUTCDate() + 1);
     return json(req, 429, {
       error: "daily_ai_budget_exceeded",
-      message: "You've used today's AI allowance. It resets at midnight UTC.",
-      limits: { calls: DAILY_CALLS, input_tokens: DAILY_INPUT_TOKENS },
+      message: isPro ? "You've used today's AI allowance. It resets at midnight UTC." : "You've used today's free AI allowance. DayScript Pro has more — or it resets at midnight UTC.",
+      upgrade: !isPro,
+      limits: { calls: dailyCalls, input_tokens: dailyInputTokens },
       used: { calls, input_tokens: inTok, output_tokens: outTok },
       resets_at: resetAt.toISOString(),
     }, { "Retry-After": String(Math.max(1, Math.ceil((resetAt.getTime() - Date.now()) / 1000))) });
@@ -259,6 +270,6 @@ Deno.serve(async (req) => {
   const callsNow = (metered as { calls?: number } | null)?.calls ?? calls + 1;
 
   return json(req, upstream.status, payload, {
-    "X-DayScript-AI-Calls-Remaining": String(Math.max(0, DAILY_CALLS - callsNow)),
+    "X-DayScript-AI-Calls-Remaining": String(Math.max(0, dailyCalls - callsNow)),
   });
 });
