@@ -1,0 +1,19 @@
+/* DayScript — legal pages (privacy, terms). Loads after style.css. */
+.legal { padding: 2.5rem 0 4rem; }
+.legal .wrap { max-width: 44rem; }
+.legal h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(1.9rem, 1.3rem + 2.6vw, 2.9rem); line-height: 1.15; margin: 0.25rem 0 0.75rem; }
+.legal h1 em { font-style: italic; color: var(--copper-deep); }
+.legal-meta { font-size: 0.85rem; color: var(--gray); margin: 0 0 1.75rem; }
+.legal .lede { font-family: var(--serif); font-style: italic; font-size: 1.2rem; line-height: 1.5; color: var(--ink); border-left: 3px solid var(--copper); padding-left: 1rem; margin: 0 0 2rem; }
+.toc { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; margin: 0 0 2.5rem; padding: 0.9rem 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.toc a { font-size: 0.9rem; color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid transparent; }
+.toc a:hover { color: var(--ink); border-color: var(--ink); }
+.legal h2 { font-family: var(--serif); font-weight: 400; font-size: 1.45rem; margin: 2.25rem 0 0.6rem; max-width: none; color: var(--ink); }
+.legal h2::before { content: ""; display: block; width: 2.5rem; height: 2px; background: var(--copper); margin-bottom: 0.8rem; }
+.legal h3 { font-family: var(--sans); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--copper); margin: 1.5rem 0 0.4rem; }
+.legal p, .legal li { color: var(--ink-soft); }
+.legal strong { color: var(--ink); }
+.legal ul { padding-left: 1.2rem; margin: 0.4rem 0 1rem; }
+.legal li { margin: 0.45rem 0; }
+.legal a { color: var(--copper-deep); }
+.legal code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; background: var(--cream-deep); padding: 0.05em 0.35em; border-radius: var(--radius); }
