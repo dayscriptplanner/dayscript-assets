@@ -456,12 +456,12 @@ document.addEventListener("keydown",function(e){
 window.addEventListener("pagehide",function(){persist();if(window.sync)window.sync.flush()});
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){persist();if(window.sync)window.sync.flush()}else if(window.sync&&window.sync.user())window.sync.pull().catch(function(){})});
 /* ---------- sync (only when app/config.js holds real Supabase values) ---------- */
-window.applyPlannerState=function(st){if(!st||typeof st!=="object")return;S=Object.assign(blank(),st);S._sug=null;S._confirm=false;S._clearInk=false;S._q="";S._delList=null;S._todoOpen=false;save({fromSync:true});persist();render()};
+window.applyPlannerState=function(st){if(!st||typeof st!=="object")return;var kv=S.view,kc=S.cursor;S=Object.assign(blank(),st);if(kv){S.view=kv;S.cursor=kc}S._sug=null;S._confirm=false;S._clearInk=false;S._q="";S._delList=null;S._todoOpen=false;save({fromSync:true});persist();render()};
 window.getPlannerState=function(){return S};
 window.addEventListener("dayscript-sync-ready",function(){
   var cfg=window.DAYSCRIPT_CONFIG;if(!cfg||!/^https:\/\/[a-z0-9-]+\.supabase\.co/.test(cfg.SUPABASE_URL||"")||/paste-anon-key/.test(cfg.SUPABASE_ANON_KEY||""))return;
   var ui=null;
-  window.sync=createSync({supabaseUrl:cfg.SUPABASE_URL,supabaseAnonKey:cfg.SUPABASE_ANON_KEY,getState:window.getPlannerState,applyState:window.applyPlannerState,
+  window.sync=createSync({supabaseUrl:cfg.SUPABASE_URL,supabaseAnonKey:cfg.SUPABASE_ANON_KEY,getState:window.getPlannerState,applyState:window.applyPlannerState,pollMs:5000,
     onStatus:function(st,d){if(ui)ui.onStatus(st,d);if(st==="conflict-resolved"&&d&&d.outcome==="server-won"&&ui)ui.say("updated from your other device")}});
   function mount(){var a=document.getElementById("cover-actions");if(!a||a.firstChild||!window.mountSyncUI)return;ui=mountSyncUI({sync:window.sync,anchor:a});ui.onStatus(window.sync.status)}
   mount();window.remountSync=mount;

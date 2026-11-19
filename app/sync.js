@@ -78,6 +78,7 @@ function isNetworkError(err) {
  * @param {(status:string, detail?:any) => void} [opts.onStatus]
  * @param {string}   [opts.clientId]
  * @param {number}   [opts.debounceMs=1500]
+ * @param {number}   [opts.pollMs=0]          while the page is visible, look for another device's writes this often (0 = off)
  * @param {string}   [opts.aiFunction='ai']   edge function name
  * @param {string}   [opts.redirectTo]        where magic links / OAuth land (default: current page)
  * @param {object}   [opts._deps]             test hooks: { createClient, fetch, now, setTimeout, clearTimeout, target }
@@ -91,6 +92,7 @@ export function createSync(opts) {
     onStatus = () => {},
     clientId = defaultClientId(),
     debounceMs = 1500,
+    pollMs = 0,
     aiFunction = 'ai',
     redirectTo,
     _deps = {},
@@ -170,6 +172,11 @@ export function createSync(opts) {
     target?.addEventListener?.('visibilitychange', onHide);
     winTarget?.addEventListener?.('pagehide', () => flush());
     winTarget?.addEventListener?.('online', () => { if (dirty && session) pushNow().catch(() => {}); });
+    winTarget?.addEventListener?.('focus', () => { checkRemote().catch(() => {}); });
+    if (pollMs > 0) {
+      const tick = () => { checkRemote().catch(() => {}).then(() => setT(tick, pollMs)); };
+      setT(tick, pollMs);
+    }
     return client;
   })();
 
@@ -314,6 +321,27 @@ export function createSync(opts) {
     return r === 'pushed' ? 'local-won' : r;
   }
 
+  /**
+   * Cheap look for another device's write: read only the version number, and fetch the
+   * document only when it moved. Never runs over unsaved local changes — if this device
+   * is dirty or mid-push, the push's own conflict handling decides instead.
+   * Returns 'skipped' | 'unchanged' | 'applied-server'.
+   */
+  async function checkRemote() {
+    if (!session || localVersion == null || dirty || pushing || debounceTimer) return 'skipped';
+    if (target && target.visibilityState === 'hidden') return 'skipped';
+    const { data, error } = await client.from(TABLE).select('version').eq('user_id', session.user.id).maybeSingle();
+    if (error || !data || data.version === localVersion) return 'unchanged';
+    const row = await fetchRow();
+    if (!row || dirty || pushing || debounceTimer) return 'skipped';   // typed while we were fetching
+    if (row.version === localVersion) return 'unchanged';
+    localVersion = row.version;
+    applyState(row.state);
+    dirty = false;
+    setStatus('synced', { reason: 'poll', outcome: 'applied-server', version: localVersion });
+    return 'applied-server';
+  }
+
   // ---------------------------------------------------------------------------
   // scheduling: debounce, flush, retry
   // ---------------------------------------------------------------------------
@@ -424,6 +452,7 @@ export function createSync(opts) {
     scheduleSave,
     flush,
     pull: () => pullAndReconcile({ reason: 'manual' }),
+    checkRemote,
     push: () => pushNow({ reason: 'manual' }),
     ai,
     get status() { return status; },

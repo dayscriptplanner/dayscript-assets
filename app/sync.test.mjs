@@ -332,3 +332,49 @@ test('ai(body) posts to the edge function with the session token; 429 surfaces a
   nextStatus = 429;
   await assert.rejects(sync.ai({ messages: [] }), (e) => e.status === 429 && e.code === 'daily_ai_budget_exceeded' && /allowance/.test(e.message));
 });
+
+test('checkRemote: another device wrote → server copy applied even if its clock is behind; no push', async () => {
+  const mine = { meta: { updatedAt: '2026-11-19T12:00:00Z' }, from: 'mine' };
+  const h = harness({ row: { user_id: 'u-1', state: mine, updated_at: '2026-11-19T12:00:00Z', version: 3 } }, mine);
+  await h.sync.ready;
+  h.sb.signIn();
+  await flushMicro(); await flushMicro();
+  assert.equal(await h.sync.checkRemote(), 'unchanged');
+  const theirs = { meta: { updatedAt: '2026-11-19T11:59:00Z' }, from: 'phone' };   // phone clock a minute slow
+  h.sb.serverWrite(theirs, '2026-11-19T11:59:00Z');
+  assert.equal(await h.sync.checkRemote(), 'applied-server');
+  assert.deepEqual(h.getState(), theirs);
+  assert.equal(h.sync.version, 4);
+  assert.equal(h.sb.db.row.version, 4, 'nothing was pushed back');
+});
+
+test('checkRemote: never overwrites unsaved local changes', async () => {
+  const mine = { meta: { updatedAt: '2026-11-19T12:00:00Z' }, from: 'mine' };
+  const h = harness({ row: { user_id: 'u-1', state: mine, updated_at: '2026-11-19T12:00:00Z', version: 3 } }, mine);
+  await h.sync.ready;
+  h.sb.signIn();
+  await flushMicro(); await flushMicro();
+  h.sb.serverWrite({ meta: { updatedAt: '2026-11-19T12:00:30Z' }, from: 'phone' }, '2026-11-19T12:00:30Z');
+  h.sync.scheduleSave();                       // typing on this device
+  assert.equal(await h.sync.checkRemote(), 'skipped');
+  assert.equal(h.applied.length, 0);
+});
+
+test('pollMs: polls while signed in and picks up the other device', async () => {
+  const mine = { meta: { updatedAt: '2026-11-19T12:00:00Z' }, from: 'mine' };
+  const sb = fakeSupabase({ row: { user_id: 'u-1', state: mine, updated_at: '2026-11-19T12:00:00Z', version: 1 } });
+  const timers = fakeTimers();
+  let state = mine;
+  const sync = createSync({
+    supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'anon', pollMs: 5000,
+    getState: () => state, applyState: (s) => { state = s; },
+    _deps: { createClient: () => sb.client, now: timers.now, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout, target: null, winTarget: null },
+  });
+  await sync.ready;
+  sb.signIn();
+  await flushMicro(); await flushMicro();
+  sb.serverWrite({ meta: { updatedAt: '2026-11-19T12:01:00Z' }, from: 'phone' }, '2026-11-19T12:01:00Z');
+  await timers.advance(5000); await flushMicro(); await flushMicro();
+  assert.equal(state.from, 'phone');
+  assert.ok(timers.pending() >= 1, 'next poll is scheduled');
+});
