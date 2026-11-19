@@ -7,8 +7,8 @@
 // NEVER put the service_role key here. It bypasses RLS and belongs only in
 // edge-function secrets (Supabase injects it there automatically).
 
-export const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
-export const SUPABASE_ANON_KEY = 'eyJ...paste-anon-key...';
+export const SUPABASE_URL = 'https://felxgqsjmmnohrrfgnmy.supabase.co';
+export const SUPABASE_ANON_KEY = 'sb_publishable_cooPU_4YLePQRWy08NrXEQ_sSBVaAk9';
 
 // Also handy for classic scripts:
 if (typeof window !== 'undefined') {
